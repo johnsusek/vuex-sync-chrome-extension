@@ -1,0 +1,17 @@
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <script src="../lib/vue.js"></script>
+</head>
+
+<body>
+  <div id="app" style="width: 320px; min-height: 200px; text-align: center; background: rgb(128, 128, 128);">
+    <h1 :style="style">{{ message }}</h1>
+    <button @click="giveBlues">Give Blues</button>
+    <button @click="makeAngry">Make Angry</button>
+  </div>
+  <script src="popup.js"></script>
+</body>
+
+</html>

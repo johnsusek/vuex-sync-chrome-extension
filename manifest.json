@@ -1,0 +1,20 @@
+{
+  "manifest_version": 2,
+  "name": "Vuex State Sync for Chrome Extensions - Example",
+  "version": "1.0.0",
+  "content_security_policy":
+    "script-src 'self' 'unsafe-eval'; object-src 'self'",
+  "content_scripts": [
+    {
+      "js": ["lib/vue.js", "lib/vuex.js", "inject/store.js", "inject/ui.js"],
+      "matches": ["https://*/*"]
+    }
+  ],
+  "background": {
+    "scripts": ["lib/vue.js", "lib/vuex.js", "background/store.js"]
+  },
+  "browser_action": {
+    "default_popup": "popup/popup.html"
+  },
+  "options_page": "options/options.html"
+}
