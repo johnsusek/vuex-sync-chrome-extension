@@ -30,32 +30,29 @@ var store = new Vuex.Store({
   }
 });
 
-listenForMutations();
-
-function listenForMutations() {
-  chrome.runtime.onConnect.addListener(port => {
-    if (port.name === 'VUEX_SYNC') {
-      handlePortConnect(port);
-      port.onMessage.addListener(msg => {
-        handlePortMessage(msg, port);
+// Subscribe to state updates on the store, to send to this tab
+store.subscribe((mutation, state) => {
+  // TODO: track STATE_INITIAL senders, and only send to them
+  chrome.tabs.query({}, tabs => {
+    tabs.forEach(tab => {
+      chrome.tabs.sendMessage(tab.id, {
+        name: 'STATE_UPDATE',
+        payload: state.synced
       });
-    }
+    });
   });
-}
+});
 
-function handlePortConnect(port) {
-  // Send down the initial state since we've just connected
-  port.postMessage({ name: 'STATE_UPDATE', payload: store.state.synced });
-
-  // Subscribe to state updates on the store, to send to this tab
-  store.subscribe((mutation, state) => {
-    port.postMessage({ name: 'STATE_UPDATE', payload: state.synced });
-  });
-}
-
-function handlePortMessage(msg, port) {
-  // A tab has broadcast a mutation, send it to the store
-  if (msg.name === 'STATE_MUTATION') {
-    store.commit(msg.details.name, msg.details.args);
+// Listen to incoming mutations
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.name === 'STATE_MUTATION') {
+    // A tab has sent up a mutation
+    store.commit(request.details.name, request.details.args);
+  } else if (request.name === 'STATE_INITIAL') {
+    // A tab has requested initial state
+    chrome.tabs.sendMessage(sender.tab.id, {
+      name: 'STATE_UPDATE',
+      payload: store.state.synced
+    });
   }
-}
+});
